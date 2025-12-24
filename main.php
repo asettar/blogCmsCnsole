@@ -2,18 +2,18 @@
 
 class User
 {
-    public int $id;
-    public string $username;
-    public string $email;
-    public string $password;
-    public string $role;
-    public string $createdAt;
-    public string $lastLogin;
+    private int $id;
+    private string $username;
+    private string $email;
+    private string $password;
+    private string $role;
+    private DateTime $createdAt;
+    private DateTime $lastLogin;
 }
 
 class Author extends User 
 {
-    public string $bio;
+    private string $bio;
 }
 
 Class Moderator extends User  
@@ -24,13 +24,36 @@ Class Moderator extends User
 
 class Editor extends User 
 {
-    public string $moderationLevel;
+    private string $moderationLevel;
 }
 
-class admin extends Moderator
+class Admin extends Moderator
 {
-    public bool $isSuperAdmin;
+    private bool $isSuperAdmin;
 }
+
+class Article 
+{
+    private int $id;
+    private string $title;
+    private string $content;
+    private string $excerpt;
+    private string $status;
+    private Author $author;
+    private DateTime $createdAt;
+    private DateTime $publishedAt;
+    private DateTime $updatedAt;
+}
+
+class Category
+{
+    private int $id;
+    private string $name;
+    private string $description;
+    private Category $parent;
+    private DateTime $createdAt;
+}
+
 
 function    displayLoginMenu() {
     echo "Welcome to BlogCms, Please login.\n";
