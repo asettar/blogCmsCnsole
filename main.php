@@ -49,10 +49,18 @@ class User
 class Author extends User 
 {
     private string $bio;
+    private array $articles;
     public  function __construct(int $id, string $username, string $email, string $password, string $createdAt, string $lastLogin, string $bio)
     {
         User::__construct($id, $username, $email, $password, $createdAt, $lastLogin);
         $this->bio = $bio;
+        $this->articles = [];
+    }
+    function    displayArticles() 
+    {
+        foreach($this->articles as $article) {
+            $article->displayInfo();
+        }
     }
 }
 
@@ -75,8 +83,19 @@ Class Moderator extends User
         foreach($articles as $art) {
             print_r($art);
         }
-    }  
+    }
 
+    public function readArticles()
+    {
+        echo "readArticles:\n";
+        global $users;      
+        foreach($users as $usr) {
+            if ($usr instanceof Author) {
+                print_r($usr);
+                $usr->displayArticles();
+            }
+        }
+    }
 }
 
 class Editor extends Moderator 
@@ -147,7 +166,7 @@ class Article
     {
         echo "article Info :\n 
             articleId : $this->id, title : $this->title, status : this->status, author = {$this->author->getUserName()} \n
-            excerpt: $this->excerpt"; 
+            excerpt: $this->excerpt \n"; 
     }
 }
 
@@ -170,9 +189,11 @@ class Category
 }
 
 // users 
-$users = [new Admin(1, "admin_blog", "admin@blogcms.com","admin123", "2024-01-15 10:00:00", "2025-01-15 10:00:00", true), 
-new Editor(2, "marie_dubois", "marie.dubois@email.com","admin123", "2024-02-15 09:15:00", "2025-02-15 09:15:00", "junior"),
-new Author(3, "marie_dubois", "marie.dubois@email.com", "admin123", "2024-02-10 11:30:00", "2025-02-10 11:30:00", "biographie")
+$users = [new Admin(1, "admin_blog", "admin@blogcms.com","admin123", "2024-01-15 10:00:00", "2025-01-15 10:00:00", true),
+    new Admin(5, "admin", "admin@blogcms.com","admin", "2024-01-15 10:00:00", "2025-01-15 10:00:00", true),
+    new Editor(2, "marie_dubois", "marie.dubois@email.com","admin123", "2024-02-15 09:15:00", "2025-02-15 09:15:00", "junior"),
+    new Editor(6, "editor", "marie.dubois@email.com","editor", "2024-02-15 09:15:00", "2025-02-15 09:15:00", "junior"),
+    new Author(3, "marie_dubois", "marie.dubois@email.com", "admin123", "2024-02-10 11:30:00", "2025-02-10 11:30:00", "biographie")
 ];
 
 $articles = []; // array of article objects
@@ -192,9 +213,9 @@ function    getAuthorWithMinArticles()
     return null;
 }
 
-// foreach($users as $usr) {
-//     print_r($usr);
-// }
+foreach($users as $usr) {
+    print_r($usr);
+}
 
 class connectionHandler
 {
@@ -235,7 +256,7 @@ function    displayLoginMenu() {
     $name = readline("Enter your name: ");
     $passwd = readline("Enter your password: ");
     checkUserCredentials($name, $passwd);
-    echo $name . "  " . $passwd;
+    echo $name . "  " . $passwd . "\n";
 }
 
 function    displayEditorMenu() 
@@ -253,17 +274,17 @@ function    checkEditorOptions()
 {
     displayEditorMenu();
     
-    $choice = (int)readline();
+    $choice = (int)readline("--> option: ");
     global $userConnection;
-    $currentUser = $userConnection->getConnectedUser();
-    print_r($currentUser);
+    $connectedUser = $userConnection->getConnectedUser();
+    // print_r($connectedUser);
 
-    // switch ($choice) {
-    //     case 1:
-    //         $connectedUser->readArticle(); 
-    //     case 2:
-            
-    // }
+    switch ($choice) {
+        case 1:
+            $connectedUser->readArticles();
+            break;
+        case 2:
+    }
 }
 
 while (true) 
@@ -273,11 +294,18 @@ while (true)
     if (!$connectedUser)
         displayLoginMenu();
     else {
+        echo "--------------\n";
+        print_r($connectedUser);
+        echo "------------\n";
         if ($connectedUser instanceof Editor) {
+            echo "yes\n";
             checkEditorOptions();
-            print_r($connectedUser);
         }
+        break;
+        // else if ()
+        // else if ()  author / 
     }
+    // break;
 }
 
 ?>
