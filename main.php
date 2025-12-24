@@ -89,8 +89,17 @@ class Category
     private int $id;
     private string $name;
     private string $description;
-    private Category $parent;
     private DateTime $createdAt;
+    private ?Category $parent;
+
+    public function __construct(int $id, string $name, string $description, string $createdAt, Category $parent)
+    {
+        $this->id = $id;
+        $this->name = $name;
+        $this->description = $description;
+        $this->createdAt = new DateTime($createdAt);
+        $this->parent = $parent;
+    }
 }
 
 
