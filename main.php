@@ -35,17 +35,27 @@ Class Moderator extends User
 {
     // common methods between admin and editor
    
-
 }
 
-class Editor extends User 
+class Editor extends Moderator 
 {
     private string $moderationLevel;
+    public  function __construct(int $id, string $username, string $email, string $password, string $createdAt, string $lastLogin, string $moderationLevel) 
+    {
+        User::__construct($id, $username, $email, $password, $createdAt, $lastLogin);
+        $this->moderationLevel = $moderationLevel;
+    }
 }
 
 class Admin extends Moderator
 {
     private bool $isSuperAdmin;
+    private string $moderationLevel;
+    public  function __construct(int $id, string $username, string $email, string $password, string $createdAt, string $lastLogin, bool $isSuperAdmin) 
+    {
+        User::__construct($id, $username, $email, $password, $createdAt, $lastLogin);
+        $this->isSuperAdmin = $isSuperAdmin;
+    }
 }
 
 class Article 
