@@ -80,12 +80,13 @@ class Article
     private string $excerpt;
     private string $status;  // draft - published
     private Author $author;
+    private array $categories;
     private DateTime $createdAt;
-    private DateTime $publishedAt;
-    private DateTime $updatedAt;
+    private ?DateTime $publishedAt;
+    private ?DateTime $updatedAt;
 
-    public  function __construct(int $id, string $title, string $content, string $excerpt, string $status,
-        Author $author, string $createdAt, string $publishedAt, string $updatedAt)
+    public  function __construct(int $id = -1, string $title = "", string $content = "", string $excerpt = "", string $status = "draft",
+        Author $author, array $categories)
     {
         $this->id = $id;
         $this->title = $title;
@@ -93,10 +94,29 @@ class Article
         $this->excerpt = $excerpt;
         $this->status = $status;
         $this->author = $author;
-        $this->createdAt = new DateTime($createdAt);
-        $this->publishedAt = new DateTime($publishedAt);
-        $this->updatedAt = new DateTime($updatedAt);
+        $this->createdAt = new DateTime();
+        $this->categories = $categories;
+        $this->publishedAt = null;
+        $this->updatedAt = null;
     }
+
+    public function readData()
+    {
+
+        echo "Enter article title: ";
+        $this->title = fgets(STDIN, 100);
+        echo "Enter article content: ";
+        $this->content = fgets(STDIN, 2000);
+        echo "Enter article excerpt: ";
+        $this->excerpt = fgets(STDIN, 2000);
+        $this->createdAt = new DateTime();
+        // to add id,
+    }
+    
+    public function setAuthor(Author $author) 
+    {
+        $this->author = $author;
+    } 
 
     public function displayInfo() : void  
     {
