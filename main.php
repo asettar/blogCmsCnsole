@@ -20,6 +20,11 @@ class User
         $this->lastLogin = new DateTime($lastLogin);
     }
 
+    public function getId()
+    {
+        return $this->id;
+    }
+
     public function getUserName() 
     {
         return $this->username;
@@ -57,6 +62,7 @@ Class Moderator extends User
    
     // create, modify, delete, publish article
     public function createAndAssignArticle() {
+        global $articles;
         $newArticle = new Article();
         $newArticle->readData();
         // assing to the author with minimum articles
@@ -106,13 +112,13 @@ class Article
     private ?DateTime $publishedAt;
     private ?DateTime $updatedAt;
 
-    public  function __construct(int $id = -1, string $title = "", string $content = "", string $excerpt = "", string $status = "draft",
+    public  function __construct(int $id = -1, string $title = "", string $content = "", string $status = "draft",
         ?Author $author = null, array $categories = [])
     {
         $this->id = $id;
         $this->title = $title;
         $this->content = $content;
-        $this->excerpt = $excerpt;
+        $this->excerpt = substr($content, 0, 150); // part of content;
         $this->status = $status;
         $this->author = $author;
         $this->createdAt = new DateTime();
@@ -123,9 +129,7 @@ class Article
 
     public function readData()
     {
-
-        echo "Enter article title: ";
-        $this->title = fgets(STDIN, 100);
+        $this->title = readline("Enter article title: ");
         echo "Enter article content: ";
         $this->content = fgets(STDIN, 2000);
         echo "Enter article excerpt: ";
@@ -192,16 +196,35 @@ function    getAuthorWithMinArticles()
 //     print_r($usr);
 // }
 
-$connectedUser = null;
+class connectionHandler
+{
+    private ?User $connectedUser;
+
+    public function __construct() {
+        $this->connectedUser = null;
+    }
+
+    public function connectUser(User $user) 
+    {
+        $this->connectedUser = $user;
+    }
+
+    public function getConnectedUser() : ?User 
+    {
+        return $this->connectedUser;
+    }
+}
+
+$userConnection = new connectionHandler();
 
 function    checkUserCredentials($name, $passwd)
 {
     global $users;
-    global $connectedUser;
+    global $userConnection;
     
     foreach($users as $user) {
         if ($user->getUserName() === $name && $user->getPassword() === $passwd) {
-            $connectedUser = $user;
+            $userConnection->connectUser($user);
             break;
         }
     }
@@ -231,20 +254,30 @@ function    checkEditorOptions()
     displayEditorMenu();
     
     $choice = (int)readline();
-    echo $choice . "\n";
+    global $userConnection;
+    $currentUser = $userConnection->getConnectedUser();
+    print_r($currentUser);
+
+    // switch ($choice) {
+    //     case 1:
+    //         $connectedUser->readArticle(); 
+    //     case 2:
+            
+    // }
 }
 
 while (true) 
-    {
-        if (!$connectedUser)
-            displayLoginMenu();
-        else {
-            if ($connectedUser instanceof Editor) {
-                checkEditorOptions();
-                print_r($connectedUser);
-            }
-            // else  ...
+{
+    $connectedUser = $userConnection->getConnectedUser();
+    var_dump($connectedUser);
+    if (!$connectedUser)
+        displayLoginMenu();
+    else {
+        if ($connectedUser instanceof Editor) {
+            checkEditorOptions();
+            print_r($connectedUser);
         }
+    }
 }
 
 ?>
