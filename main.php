@@ -10,26 +10,32 @@ class User
     private DateTime $lastLogin;
 
 
-    public function __construct(int $id, string $username, string $email, string $password, DateTime $createdAt, DateTime $lastLogin)
+    public function __construct(int $id, string $username, string $email, string $password, string $createdAt, string $lastLogin)
     {
         $this->id = $id;
         $this->username = $username;
         $this->email = $email;
         $this->password = $password;
-        $this->createdAt = $createdAt;
-        $this->lastLogin = $lastLogin;
+        $this->createdAt = new DateTime($createdAt);
+        $this->lastLogin = new DateTime($lastLogin);
     }
 }
 
 class Author extends User 
 {
     private string $bio;
+    public  function __construct(int $id, string $username, string $email, string $password, string $createdAt, string $lastLogin, string $bio)
+    {
+        User::__construct($id, $username, $email, $password, $createdAt, $lastLogin);
+        $this->bio = $bio;
+    }
 }
 
-Class Moderator extends User  
+Class Moderator extends User
 {
-
     // common methods between admin and editor
+   
+
 }
 
 class Editor extends User 
@@ -72,6 +78,8 @@ function    displayLoginMenu() {
     echo "Enter your password: "; 
     $password = fgets(STDIN, 100);
 }
+
+// test 
 
 displayLoginMenu();
 ?>
