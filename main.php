@@ -50,7 +50,6 @@ class Editor extends Moderator
 class Admin extends Moderator
 {
     private bool $isSuperAdmin;
-    private string $moderationLevel;
     public  function __construct(int $id, string $username, string $email, string $password, string $createdAt, string $lastLogin, bool $isSuperAdmin) 
     {
         User::__construct($id, $username, $email, $password, $createdAt, $lastLogin);
@@ -69,6 +68,20 @@ class Article
     private DateTime $createdAt;
     private DateTime $publishedAt;
     private DateTime $updatedAt;
+
+    public  function __construct(int $id, string $title, string $content, string $excerpt, string $status,
+        Author $author, string $createdAt, string $publishedAt, string $updatedAt)
+    {
+        $this->id = $id;
+        $this->title = $title;
+        $this->content = $content;
+        $this->excerpt = $excerpt;
+        $this->status = $status;
+        $this->author = $author;
+        $this->createdAt = new DateTime($createdAt);
+        $this->publishedAt = new DateTime($publishedAt);
+        $this->updatedAt = new DateTime($updatedAt);
+    }
 }
 
 class Category
