@@ -30,6 +30,11 @@ class User
         return $this->email;
     }
 
+    public function getPassword() 
+    {
+        return $this->password;
+    }
+
     protected function readArticle(Article $article) 
     {
         $article->displayInfo();
@@ -50,6 +55,22 @@ Class Moderator extends User
 {
     // common methods between admin and editor
    
+    // create, modify, delete, publish article
+    public function createAndAssignArticle() {
+        $newArticle = new Article();
+        $newArticle->readData();
+        // assing to the author with minimum articles
+        $author = getAuthorWithMinArticles();
+        $newArticle->setAuthor($author);
+        if ($author) {
+            // add article to articles
+            $articles[] = $newArticle;
+        }
+        foreach($articles as $art) {
+            print_r($art);
+        }
+    }  
+
 }
 
 class Editor extends Moderator 
@@ -86,7 +107,7 @@ class Article
     private ?DateTime $updatedAt;
 
     public  function __construct(int $id = -1, string $title = "", string $content = "", string $excerpt = "", string $status = "draft",
-        Author $author, array $categories)
+        ?Author $author = null, array $categories = [])
     {
         $this->id = $id;
         $this->title = $title;
@@ -145,27 +166,85 @@ class Category
 }
 
 // users 
-$users = [new Admin(1, "admin_blog", "admin@blogcms.com","$2y$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW", "2024-01-15 10:00:00", "2025-01-15 10:00:00", true), 
-new Editor(2, "marie_dubois", "marie.dubois@email.com","$2y$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW", "2024-02-15 09:15:00", "2025-02-15 09:15:00", "junior"),
-new Author(3, "marie_dubois", "marie.dubois@email.com", "$2y$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW", "2024-02-10 11:30:00", "2025-02-10 11:30:00", "biographie")
+$users = [new Admin(1, "admin_blog", "admin@blogcms.com","admin123", "2024-01-15 10:00:00", "2025-01-15 10:00:00", true), 
+new Editor(2, "marie_dubois", "marie.dubois@email.com","admin123", "2024-02-15 09:15:00", "2025-02-15 09:15:00", "junior"),
+new Author(3, "marie_dubois", "marie.dubois@email.com", "admin123", "2024-02-10 11:30:00", "2025-02-10 11:30:00", "biographie")
 ];
+
+$articles = []; // array of article objects
 // categories
 // articles
 
+function    getAuthorWithMinArticles() 
+{
+    
+    global $users;
 
-foreach($users as $usr) {
-    print_r($usr);
+    foreach($users as $user) {
+        if ($user instanceof Author) {
+            return $user;  // return first author for now, to fix later
+        }
+    }
+    return null;
+}
+
+// foreach($users as $usr) {
+//     print_r($usr);
+// }
+
+$connectedUser = null;
+
+function    checkUserCredentials($name, $passwd)
+{
+    global $users;
+    global $connectedUser;
+    
+    foreach($users as $user) {
+        if ($user->getUserName() === $name && $user->getPassword() === $passwd) {
+            $connectedUser = $user;
+            break;
+        }
+    }
 }
 
 function    displayLoginMenu() {
     echo "Welcome to BlogCms, Please login.\n";
-    echo "Enter your name: ";
-    $name = fgets(STDIN, 100);
-    echo "Enter your password: "; 
-    $password = fgets(STDIN, 100);
+    $name = readline("Enter your name: ");
+    $passwd = readline("Enter your password: ");
+    checkUserCredentials($name, $passwd);
+    echo $name . "  " . $passwd;
 }
 
-// test 
+function    displayEditorMenu() 
+{
+    echo " Please select an option :\n";
+    echo " 1- Read articles.\n";
+    echo " 2- Create article.\n";
+    echo " 3- Modify article.\n";
+    echo " 4- Delete article.\n";
+    echo " 5- Publish article.\n";
+    // ... 
+}
 
-displayLoginMenu();
+function    checkEditorOptions() 
+{
+    displayEditorMenu();
+    
+    $choice = (int)readline();
+    echo $choice . "\n";
+}
+
+while (true) 
+    {
+        if (!$connectedUser)
+            displayLoginMenu();
+        else {
+            if ($connectedUser instanceof Editor) {
+                checkEditorOptions();
+                print_r($connectedUser);
+            }
+            // else  ...
+        }
+}
+
 ?>
