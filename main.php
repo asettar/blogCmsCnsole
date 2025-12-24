@@ -6,9 +6,19 @@ class User
     private string $username;
     private string $email;
     private string $password;
-    private string $role;
     private DateTime $createdAt;
     private DateTime $lastLogin;
+
+
+    public function __construct(int $id, string $username, string $email, string $password, DateTime $createdAt, DateTime $lastLogin)
+    {
+        $this->id = $id;
+        $this->username = $username;
+        $this->email = $email;
+        $this->password = $password;
+        $this->createdAt = $createdAt;
+        $this->lastLogin = $lastLogin;
+    }
 }
 
 class Author extends User 
