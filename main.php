@@ -19,6 +19,21 @@ class User
         $this->createdAt = new DateTime($createdAt);
         $this->lastLogin = new DateTime($lastLogin);
     }
+
+    public function getUserName() 
+    {
+        return $this->username;
+    }
+    
+    public function getEmail() 
+    {
+        return $this->email;
+    }
+
+    protected function readArticle(Article $article) 
+    {
+        $article->displayInfo();
+    }
 }
 
 class Author extends User 
@@ -63,7 +78,7 @@ class Article
     private string $title;
     private string $content;
     private string $excerpt;
-    private string $status;
+    private string $status;  // draft - published
     private Author $author;
     private DateTime $createdAt;
     private DateTime $publishedAt;
@@ -81,6 +96,13 @@ class Article
         $this->createdAt = new DateTime($createdAt);
         $this->publishedAt = new DateTime($publishedAt);
         $this->updatedAt = new DateTime($updatedAt);
+    }
+
+    public function displayInfo() : void  
+    {
+        echo "article Info :\n 
+            articleId : $this->id, title : $this->title, status : this->status, author = {$this->author->getUserName()} \n
+            excerpt: $this->excerpt"; 
     }
 }
 
@@ -102,6 +124,18 @@ class Category
     }
 }
 
+// users 
+$users = [new Admin(1, "admin_blog", "admin@blogcms.com","$2y$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW", "2024-01-15 10:00:00", "2025-01-15 10:00:00", true), 
+new Editor(2, "marie_dubois", "marie.dubois@email.com","$2y$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW", "2024-02-15 09:15:00", "2025-02-15 09:15:00", "junior"),
+new Author(3, "marie_dubois", "marie.dubois@email.com", "$2y$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW", "2024-02-10 11:30:00", "2025-02-10 11:30:00", "biographie")
+];
+// categories
+// articles
+
+
+foreach($users as $usr) {
+    print_r($usr);
+}
 
 function    displayLoginMenu() {
     echo "Welcome to BlogCms, Please login.\n";
