@@ -114,7 +114,7 @@ class BlogCms
                 $this->connectedUser->createAndAssignArticle($this->getAuthors(), $this->getCategories());
                 break;
             case 3:
-                // $this->connectedUser->modifyArticle();
+                $this->connectedUser->modifyArticle($this->getAvailableArticles());
                 break ;
             case 4:
                 $this->connectedUser->deleteArticle($this->getAvailableArticles(), $this->getAuthors());
@@ -128,7 +128,7 @@ class BlogCms
             case 7: 
                 // delete User
             default :
-                echo "invalid option, try again please.";
+                echo "invalid option, try again please.\n";
         }
     }
 }

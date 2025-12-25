@@ -138,13 +138,43 @@ Class Moderator extends User
 
     public function deleteArticle(array $articles, array $authors) : void {
         $chosenId = $this->getChosenArticleId($articles);
+        if ($chosenId == -1) return;
         $confirm = readline("Are you sure (Y / N) ? :");
         if ($confirm === 'Y') {
             $this->deleteArticleById($chosenId, $authors);
             echo "article has been succesfully deleted\n";
         }
     }
+    
+    private function    checkModificationOptions() : int  {
+        echo "Please section one of these modification options possibles:\n";
+        echo "  1-Modify title.\n";
+        echo "  2-Modify status.\n";
+        echo "  3-Modify content.\n";
+        
+        $choice = (int)readline("  --> option: ");
+        return $choice;
+    }
 
+    public function modifyArticle(array $articles) {
+        $chosenId = $this->getChosenArticleId($articles);
+        if ($chosenId == -1) return ;
+        $option = $this->checkModificationOptions();
+        $article = $articles[$chosenId];
+        switch ($option) {
+            case 1:
+                $article->readTitleInput();
+                break;
+            case 2:
+                $article->readStatusInput();
+                break;
+            case 3:
+                $article->readContentInput();
+                break;
+            default :
+                echo "invalid option, try again please.\n";
+        }
+    }
 }
 
 class Editor extends Moderator 
@@ -223,6 +253,33 @@ class Article
 
     public function setStatus(string $newStatus) : void {
         $this->status = $newStatus;
+    }
+
+    public function setContent(string $content) : void {
+        $this->content = $content;
+    }
+
+    public function setTitle(string $title) : void {
+        $this->title = $title;
+    }
+
+    public  function    readTitleInput() : void {
+        $this->title = readline("Enter article title: ");
+    }
+    
+    public  function    readContentInput() : void {
+        $this->content = readline("Enter article content: ");
+        $this->excerpt = substr($this->content, 0, 150);
+    }
+
+    public function readStatusInput() {
+        echo "Please select article status :\n";
+        echo "1- draft.\n";
+        echo "2- published.\n";
+        $option = (int)readline(" --> option: ");
+        if ($option == 1) $this->status = 'draft';
+        else if ($option == 2) $this->status = 'published';
+        else echo "invalid option, please try again.\n";
     }
 
     public function setArticleData(array $categories) : void
