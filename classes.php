@@ -2,6 +2,7 @@
 
 class User
 {
+    private static int $nextId = 0;
     private int $id;
     private string $username;
     private string $email;
@@ -10,9 +11,9 @@ class User
     private DateTime $lastLogin;
 
 
-    public function __construct(int $id, string $username, string $email, string $password, string $createdAt, string $lastLogin)
-    {
-        $this->id = $id;
+    public function __construct(string $username, string $email, string $password, string $createdAt, string $lastLogin) {
+        self::$nextId++;
+        $this->id = self::$nextId;
         $this->username = $username;
         $this->email = $email;
         $this->password = $password;
@@ -20,28 +21,23 @@ class User
         $this->lastLogin = new DateTime($lastLogin);
     }
 
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
-    public function getUserName() 
-    {
+    public function getUserName() {
         return $this->username;
     }
     
-    public function getEmail() 
-    {
+    public function getEmail() {
         return $this->email;
     }
 
-    public function getPassword() 
-    {
+    public function getPassword() {
         return $this->password;
     }
 
-    protected function readArticle(Article $article) 
-    {
+    protected function readArticle(Article $article) {
         $article->displayInfo();
     }
 }
@@ -50,8 +46,8 @@ class Author extends User
 {
     private string $bio;
     private array $articles;
-    public  function __construct(int $id, string $username, string $email, string $password, string $createdAt, string $lastLogin, string $bio) {
-        User::__construct($id, $username, $email, $password, $createdAt, $lastLogin);
+    public  function __construct(string $username, string $email, string $password, string $createdAt, string $lastLogin, string $bio) {
+        User::__construct($username, $email, $password, $createdAt, $lastLogin);
         $this->bio = $bio;
         $this->articles = [];
     }
@@ -74,8 +70,7 @@ Class Moderator extends User
 {
     // common methods between admin and editor
    
-    private function getArticlesInDraft() : Array 
-    {
+    private function getArticlesInDraft() : Array  {
         global $users;
         $articlesInDraft = [];
         foreach ($users as $user) {
@@ -88,21 +83,24 @@ Class Moderator extends User
         return $articlesInDraft;
     }
 
+        
+    private function    getAuthorWithMinArticles(array $authors) : ?Author {
+        return count($authors) ? $authors[0] : null; // to fix later
+    }
+
     // create, modify, delete, publish article
-    public function createAndAssignArticle() {
+    public function createAndAssignArticle(array $authors, array $categories) : void {
         $newArticle = new Article();
-        $newArticle->setArticleData();
+        $newArticle->setArticleData($categories);
         // assign to the author with minimum articles
-        $author = getAuthorWithMinArticles();
+        $author = $this->getAuthorWithMinArticles($authors);
         echo "the article will be set to the author having username {$author->getUserName()}\n";
         $author->addArticle($newArticle);
     }
 
-    public function readArticles()
-    {
+    public function readArticles(array $users) : void {
         // todo : list by author/category ..
         echo "Available Articles:\n";
-        global $users;      
         foreach($users as $usr) {
             if ($usr instanceof Author) {
                 $usr->displayArticles();
@@ -110,8 +108,7 @@ Class Moderator extends User
         }
     }
 
-    public function publishArticle()
-    {
+    public function publishArticle() {
         $articles = $this->getArticlesInDraft();  //[id : object]
         if (!count($articles)) {
             echo "No artilce in draft has been found";
@@ -137,9 +134,9 @@ Class Moderator extends User
 class Editor extends Moderator 
 {
     private string $moderationLevel;
-    public  function __construct(int $id, string $username, string $email, string $password, string $createdAt, string $lastLogin, string $moderationLevel) 
+    public  function __construct(string $username, string $email, string $password, string $createdAt, string $lastLogin, string $moderationLevel) 
     {
-        User::__construct($id, $username, $email, $password, $createdAt, $lastLogin);
+        User::__construct($username, $email, $password, $createdAt, $lastLogin);
         $this->moderationLevel = $moderationLevel;
     }
 }
@@ -147,9 +144,9 @@ class Editor extends Moderator
 class Admin extends Moderator
 {
     private bool $isSuperAdmin;
-    public  function __construct(int $id, string $username, string $email, string $password, string $createdAt, string $lastLogin, bool $isSuperAdmin) 
+    public  function __construct(string $username, string $email, string $password, string $createdAt, string $lastLogin, bool $isSuperAdmin) 
     {
-        User::__construct($id, $username, $email, $password, $createdAt, $lastLogin);
+        User::__construct($username, $email, $password, $createdAt, $lastLogin);
         $this->isSuperAdmin = $isSuperAdmin;
     }
 }
@@ -167,8 +164,7 @@ class Article
     private ?DateTime $publishedAt;
     private ?DateTime $updatedAt;
 
-    private function chooseCategories() {
-        global $categories;
+    private function chooseCategories(array $categories) {
         echo "Available categories:\n";
         foreach ($categories as $category) {
             echo "{$category->getId()} - {$category->getName()}\n";
@@ -213,7 +209,7 @@ class Article
         $this->status = $newStatus;
     }
 
-    public function setArticleData() : void
+    public function setArticleData(array $categories) : void
     {
         $this->title = readline("Enter article title: ");
         $this->content = readline("Enter article content: ");
@@ -221,7 +217,7 @@ class Article
         $this->createdAt = new DateTime();
         $this->publishedAt = null; 
         $this->updatedAt = null;
-        $chosenCategories = $this->chooseCategories();
+        $chosenCategories = $this->chooseCategories($categories);
         $chosenCategories = ($chosenCategories);
     }
     
@@ -263,102 +259,4 @@ class Category
         return $this->name;
     }
 }
-
-// users 
-$users = [new Admin(1, "admin_blog", "admin@blogcms.com","admin123", "2024-01-15 10:00:00", "2025-01-15 10:00:00", true),
-    new Admin(5, "admin", "admin@blogcms.com","admin", "2024-01-15 10:00:00", "2025-01-15 10:00:00", true),
-    new Editor(2, "marie_dubois", "marie.dubois@email.com","admin123", "2024-02-15 09:15:00", "2025-02-15 09:15:00", "junior"),
-    new Editor(6, "editor", "marie.dubois@email.com","editor", "2024-02-15 09:15:00", "2025-02-15 09:15:00", "junior"),
-    new Author(3, "marie_dubois", "marie.dubois@email.com", "admin123", "2024-02-10 11:30:00", "2025-02-10 11:30:00", "biographie")
-];
-
-$categories = [
-    new Category(1, "Tech", "Technology", "2024-01-01", null),
-    new Category(2, "AI", "Artificial Intelligence", "2024-01-01", null),
-    new Category(3, "Web", "Web Development", "2024-01-01", null),
-];
-
-function    getAuthorWithMinArticles() 
-{
-    
-    global $users;
-
-    foreach($users as $user) {
-        if ($user instanceof Author) {
-            return $user;  // return first author for now, to fix later
-        }
-    }
-    return null;
-}
-
-// foreach($users as $usr) {
-//     print_r($usr);
-// }
-
-/** @var ?User|Moderator|Author $connectedUser */
-$connectedUser = null;
-
-function    checkUserCredentials($name, $passwd)
-{
-    global $users, $connectedUser;
-    
-    foreach($users as $user) {
-        if ($user->getUserName() === $name && $user->getPassword() === $passwd) {
-            $connectedUser = $user;
-            break;
-        }
-    }
-}
-
-function    displayLoginMenu() {
-    echo "Welcome to BlogCms, Please login.\n";
-    $name = readline("Enter your name: ");
-    $passwd = readline("Enter your password: ");
-    checkUserCredentials($name, $passwd);
-    echo $name . "  " . $passwd . "\n";
-} 
-
-function    displayEditorMenu() 
-{
-    echo " Please select an option :\n";
-    echo " 1- Read articles.\n";
-    echo " 2- Create article.\n";
-    echo " 3- Modify article.\n";
-    echo " 4- Delete article.\n";
-    echo " 5- Publish article.\n";
-    // ... 
-}
-
-function    checkEditorOptions() 
-{
-    displayEditorMenu();
-    
-    $choice = (int)readline("--> option: ");
-    global $connectedUser;
-
-    switch ($choice) {
-        case 1:
-            $connectedUser->readArticles();
-            break;
-        case 2:
-            $connectedUser->createAndAssignArticle();
-            break;
-        case 5:
-            $connectedUser->publishArticle();
-            break;
-    }
-}
-
-while (true) 
-{
-    // var_dump($connectedUser);
-    if (!$connectedUser)
-        displayLoginMenu();
-    else {
-        if ($connectedUser instanceof Editor) {
-            checkEditorOptions();
-        }
-    }
-}
-
 ?>
