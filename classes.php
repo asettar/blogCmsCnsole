@@ -112,7 +112,7 @@ Class Moderator extends User
 
     private function deleteArticleById(int $chosenId, array $authors) {
         foreach($authors as $author) {
-            $articles = $author->getArticles(); 
+            $articles = $author->getArticles();
             foreach($articles as $idx => $article) {
                 if ($article->getId() !== $chosenId) continue;
                 $author->deleteAuthorArticle($idx);
@@ -123,7 +123,7 @@ Class Moderator extends User
 
     public function deleteArticle(array $articles, array $authors) : void {
         if (!count($articles)) {
-            echo "No artilces has been found";
+            echo "No artilces has been found.\n";
             return ;
         } 
         echo "All available article ids :\n";

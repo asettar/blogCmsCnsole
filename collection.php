@@ -97,11 +97,16 @@ class BlogCms
         echo " 5- Publish article.\n";
         // ... 
     }
-    public function    checkEditorOptions() : void  
+    public function    checkModeratorOptions(bool $isAdmin) : void  
     {
         $this->displayEditorMenu();
-        
+        if ($isAdmin) {
+            echo " 6- add User.\n";
+            echo " 7- Delete User.\n";
+        } 
+
         $choice = (int)readline("--> option: ");
+        if (!$isAdmin && ($choice == 6 || $choice == 7)) $choice = -1;
         switch ($choice) {
             case 1:
                 $this->connectedUser->readArticles($this->getAuthors());
@@ -115,16 +120,19 @@ class BlogCms
             case 5:
                 $this->connectedUser->publishArticle($this->getArticlesInDraft());
                 break;
+            case 6:
+                // add User
+                break;
+            case 7: 
+                // delete User
+            default :
+                echo "invalid option, try again please.";
         }
     }
 }
 
 // main
 $blogCmsApp = new BlogCms();
-
-// foreach($users as $usr) {
-//     print_r($usr);
-// }
 
 while (true) {
     $connectedUser = $blogCmsApp->getConnectedUser(); 
@@ -133,7 +141,10 @@ while (true) {
         $blogCmsApp->displayLoginMenu();
     else {
         if ($connectedUser instanceof Editor) {
-            $blogCmsApp->checkEditorOptions();
+            $blogCmsApp->checkModeratorOptions(false);
+        }
+        else if ($connectedUser instanceof Admin) {
+            $blogCmsApp->checkModeratorOptions(true);
         }
         // 
     }
