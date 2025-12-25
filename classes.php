@@ -52,17 +52,21 @@ class Author extends User
         $this->articles = [];
     }
 
-    function getArticles(){
+    public function getArticles(){
         return $this->articles;
     }
 
-    function    displayArticles() : void  {
+    public function    displayArticles() : void  {
         foreach($this->articles as $article) {
             $article->displayInfo();
         }
     }
-    function    addArticle(Article $newArticle) : void {
+    public function    addArticle(Article $newArticle) : void {
         $this->articles[] = $newArticle; 
+    }
+
+    public function deleteAuthorArticle(int $articleIdx) : void {
+        unset($this->articles[$articleIdx]);
     }
 }
 
@@ -96,20 +100,44 @@ Class Moderator extends User
             echo "No artilce in draft has been found";
             return ;
         }
-        do 
-        {
-            $badIdChosen = true; 
-            echo "Available article ids in draft :\n";
-            foreach($articles as $articleId => $article) echo "id = $articleId,  title = {$article->getTitle()} \n";
-            $chosenId = (int)readline("Please select one of the ids above :");
-            echo $chosenId . "\n"; 
-            if (isset($articles[$chosenId])) {
-                $articles[$chosenId]->setStatus('published');
-                echo "article status has succesfully changed to published\n";
-                $badIdChosen = false;
+        echo "Available article ids in draft :\n";
+        foreach($articles as $articleId => $article) echo "id = $articleId,  title = {$article->getTitle()} \n";
+        $chosenId = (int)readline("Please select one of the ids above :");
+        if (isset($articles[$chosenId])) {
+            $articles[$chosenId]->setStatus('published');
+            echo "article status has succesfully changed to published\n";
+        }
+        else echo "id chosen not found, please try again.\n";
+    }
+
+    private function deleteArticleById(int $chosenId, array $authors) {
+        foreach($authors as $author) {
+            $articles = $author->getArticles(); 
+            foreach($articles as $idx => $article) {
+                if ($article->getId() !== $chosenId) continue;
+                $author->deleteAuthorArticle($idx);
+                return ;
             }
-            else echo "id chosen not found, please try again\n";
-        } while ($badIdChosen);
+        }
+    }
+
+    public function deleteArticle(array $articles, array $authors) : void {
+        if (!count($articles)) {
+            echo "No artilces has been found";
+            return ;
+        } 
+        echo "All available article ids :\n";
+        foreach($articles as $articleId => $article) echo "id = $articleId,  title = {$article->getTitle()} \n";
+        $chosenId = (int)readline("Please select one of the ids above :");
+        if (!isset($articles[$chosenId])) {
+            echo "id chosen not found, please try again\n";
+            return ;
+        }
+        $confirm = readline("Are you sure (Y / N) ? :");
+        if ($confirm === 'Y') {
+            $this->deleteArticleById($chosenId, $authors);
+            echo "article has been succesfully deleted\n";
+        }
     }
 }
 

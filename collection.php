@@ -47,11 +47,22 @@ class BlogCms
         return $authors;
     }
     
+    private function    getAvailableArticles() : array {
+        $articles = [];
+        $authors = $this->getAuthors();
+        foreach($authors as $author) {
+            foreach($author->getArticles() as $article) {
+                $articles[$article->getId()] = $article;
+            }
+        }
+        return $articles;
+    }
+
     private function getArticlesInDraft() : array  {
         $articlesInDraft = [];
-        foreach ($this->users as $user) {
-            if (!$user instanceof Author) continue;
-            foreach($user->getArticles() as $article) {
+        $authors = $this->getAuthors();
+        foreach ($authors as $author) {
+            foreach($author->getArticles() as $article) {
                 if (!$article->isDraft()) continue ;
                 $articlesInDraft[$article->getId()] = $article;
             }
@@ -99,7 +110,7 @@ class BlogCms
                 $this->connectedUser->createAndAssignArticle($this->getAuthors(), $this->getCategories());
                 break;
             case 4:
-                // $this->connectedUser->deleteArticle($this->getAvailableArticles());
+                $this->connectedUser->deleteArticle($this->getAvailableArticles(), $this->getAuthors());
                 break ;
             case 5:
                 $this->connectedUser->publishArticle($this->getArticlesInDraft());
