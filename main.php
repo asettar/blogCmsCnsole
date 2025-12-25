@@ -62,6 +62,10 @@ class Author extends User
             $article->displayInfo();
         }
     }
+    function    addArticle(Article $newArticle) 
+    {
+        $this->articles[] = $newArticle; 
+    }
 }
 
 Class Moderator extends User
@@ -70,28 +74,21 @@ Class Moderator extends User
    
     // create, modify, delete, publish article
     public function createAndAssignArticle() {
-        global $articles;
         $newArticle = new Article();
-        $newArticle->readData();
-        // assing to the author with minimum articles
+        $newArticle->setArticleData();
+        // assign to the author with minimum articles
         $author = getAuthorWithMinArticles();
-        $newArticle->setAuthor($author);
-        if ($author) {
-            // add article to articles
-            $articles[] = $newArticle;
-        }
-        foreach($articles as $art) {
-            print_r($art);
-        }
+        echo "the article will be set to the author having username {$author->getUserName()}\n";
+        $author->addArticle($newArticle);
     }
 
     public function readArticles()
     {
-        echo "readArticles:\n";
+        // todo : list by author/category ..
+        echo "Available Articles:\n";
         global $users;      
         foreach($users as $usr) {
             if ($usr instanceof Author) {
-                print_r($usr);
                 $usr->displayArticles();
             }
         }
@@ -125,48 +122,62 @@ class Article
     private string $content;
     private string $excerpt;
     private string $status;  // draft - published
-    private Author $author;
     private array $categories;
     private DateTime $createdAt;
     private ?DateTime $publishedAt;
     private ?DateTime $updatedAt;
 
-    public  function __construct(int $id = -1, string $title = "", string $content = "", string $status = "draft",
-        ?Author $author = null, array $categories = [])
+    private function chooseCategories()
+    {
+        global $categories;
+        echo "Available categories:\n";
+        foreach ($categories as $category) {
+            echo "{$category->getId()} - {$category->getName()}\n";
+        }
+
+        $input = readline("Enter category IDs belonging to the article separted by '-': ");
+        $ids = explode('-', $input);  // split to array of ids
+
+        foreach ($categories as $category) {
+            if (in_array($category->getId(), $ids)) {
+                $this->categories[] = $category;
+            }
+        }
+    }
+
+    public  function __construct(int $id = -1, string $title = "", string $content = "", string $status = "draft", array $categories = [])
     {
         $this->id = $id;
         $this->title = $title;
         $this->content = $content;
         $this->excerpt = substr($content, 0, 150); // part of content;
         $this->status = $status;
-        $this->author = $author;
         $this->createdAt = new DateTime();
         $this->categories = $categories;
         $this->publishedAt = null;
         $this->updatedAt = null;
     }
 
-    public function readData()
+    public function setArticleData() : void
     {
         $this->title = readline("Enter article title: ");
-        echo "Enter article content: ";
-        $this->content = fgets(STDIN, 2000);
-        echo "Enter article excerpt: ";
-        $this->excerpt = fgets(STDIN, 2000);
+        $this->content = readline("Enter article content: ");
         $this->createdAt = new DateTime();
+        $this->publishedAt = null; 
+        $this->updatedAt = null;
         // to add id,
+        $chosenCategories = $this->chooseCategories();
+        $chosenCategories = ($chosenCategories);
     }
     
-    public function setAuthor(Author $author) 
-    {
-        $this->author = $author;
-    } 
-
     public function displayInfo() : void  
     {
-        echo "article Info :\n 
-            articleId : $this->id, title : $this->title, status : this->status, author = {$this->author->getUserName()} \n
-            excerpt: $this->excerpt \n"; 
+        echo "article Info : 
+            articleId : $this->id, title : $this->title, status : $this->status.
+            content: $this->content 
+            categories: ";
+        foreach($this->categories as $category) echo $category->getName() . ", ";
+        echo "\n";
     }
 }
 
@@ -178,13 +189,23 @@ class Category
     private DateTime $createdAt;
     private ?Category $parent;
 
-    public function __construct(int $id, string $name, string $description, string $createdAt, Category $parent)
+    public function __construct(int $id, string $name, string $description, string $createdAt, ?Category $parent)
     {
         $this->id = $id;
         $this->name = $name;
         $this->description = $description;
         $this->createdAt = new DateTime($createdAt);
         $this->parent = $parent;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function getName()
+    {
+        return $this->name;
     }
 }
 
@@ -196,9 +217,11 @@ $users = [new Admin(1, "admin_blog", "admin@blogcms.com","admin123", "2024-01-15
     new Author(3, "marie_dubois", "marie.dubois@email.com", "admin123", "2024-02-10 11:30:00", "2025-02-10 11:30:00", "biographie")
 ];
 
-$articles = []; // array of article objects
-// categories
-// articles
+$categories = [
+    new Category(1, "Tech", "Technology", "2024-01-01", null),
+    new Category(2, "AI", "Artificial Intelligence", "2024-01-01", null),
+    new Category(3, "Web", "Web Development", "2024-01-01", null),
+];
 
 function    getAuthorWithMinArticles() 
 {
@@ -213,39 +236,20 @@ function    getAuthorWithMinArticles()
     return null;
 }
 
-foreach($users as $usr) {
-    print_r($usr);
-}
+// foreach($users as $usr) {
+//     print_r($usr);
+// }
 
-class connectionHandler
-{
-    private ?User $connectedUser;
-
-    public function __construct() {
-        $this->connectedUser = null;
-    }
-
-    public function connectUser(User $user) 
-    {
-        $this->connectedUser = $user;
-    }
-
-    public function getConnectedUser() : ?User 
-    {
-        return $this->connectedUser;
-    }
-}
-
-$userConnection = new connectionHandler();
+/** @var ?User|Moderator|Author $connectedUser */
+$connectedUser = null;
 
 function    checkUserCredentials($name, $passwd)
 {
-    global $users;
-    global $userConnection;
+    global $users, $connectedUser;
     
     foreach($users as $user) {
         if ($user->getUserName() === $name && $user->getPassword() === $passwd) {
-            $userConnection->connectUser($user);
+            $connectedUser = $user;
             break;
         }
     }
@@ -257,7 +261,7 @@ function    displayLoginMenu() {
     $passwd = readline("Enter your password: ");
     checkUserCredentials($name, $passwd);
     echo $name . "  " . $passwd . "\n";
-}
+} 
 
 function    displayEditorMenu() 
 {
@@ -275,37 +279,28 @@ function    checkEditorOptions()
     displayEditorMenu();
     
     $choice = (int)readline("--> option: ");
-    global $userConnection;
-    $connectedUser = $userConnection->getConnectedUser();
-    // print_r($connectedUser);
+    global $connectedUser;
 
     switch ($choice) {
         case 1:
             $connectedUser->readArticles();
             break;
         case 2:
+            $connectedUser->createAndAssignArticle();
+            break;
     }
 }
 
 while (true) 
 {
-    $connectedUser = $userConnection->getConnectedUser();
-    var_dump($connectedUser);
+    // var_dump($connectedUser);
     if (!$connectedUser)
         displayLoginMenu();
     else {
-        echo "--------------\n";
-        print_r($connectedUser);
-        echo "------------\n";
         if ($connectedUser instanceof Editor) {
-            echo "yes\n";
             checkEditorOptions();
         }
-        break;
-        // else if ()
-        // else if ()  author / 
     }
-    // break;
 }
 
 ?>
