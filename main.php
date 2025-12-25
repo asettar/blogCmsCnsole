@@ -50,20 +50,22 @@ class Author extends User
 {
     private string $bio;
     private array $articles;
-    public  function __construct(int $id, string $username, string $email, string $password, string $createdAt, string $lastLogin, string $bio)
-    {
+    public  function __construct(int $id, string $username, string $email, string $password, string $createdAt, string $lastLogin, string $bio) {
         User::__construct($id, $username, $email, $password, $createdAt, $lastLogin);
         $this->bio = $bio;
         $this->articles = [];
     }
-    function    displayArticles() 
-    {
+
+    function getArticles(){
+        return $this->articles;
+    }
+
+    function    displayArticles() : void  {
         foreach($this->articles as $article) {
             $article->displayInfo();
         }
     }
-    function    addArticle(Article $newArticle) 
-    {
+    function    addArticle(Article $newArticle) : void {
         $this->articles[] = $newArticle; 
     }
 }
@@ -72,6 +74,20 @@ Class Moderator extends User
 {
     // common methods between admin and editor
    
+    private function getArticlesInDraft() : Array 
+    {
+        global $users;
+        $articlesInDraft = [];
+        foreach ($users as $user) {
+            if (!$user instanceof Author) continue ;
+            foreach($user->getArticles() as $article) {
+                if (!$article->isDraft()) continue ;
+                $articlesInDraft[$article->getId()] = $article;
+            }
+        }
+        return $articlesInDraft;
+    }
+
     // create, modify, delete, publish article
     public function createAndAssignArticle() {
         $newArticle = new Article();
@@ -92,6 +108,29 @@ Class Moderator extends User
                 $usr->displayArticles();
             }
         }
+    }
+
+    public function publishArticle()
+    {
+        $articles = $this->getArticlesInDraft();  //[id : object]
+        if (!count($articles)) {
+            echo "No artilce in draft has been found";
+            return ;
+        }
+        do 
+        {
+            $badIdChosen = true; 
+            echo "Available article ids in draft :\n";
+            foreach($articles as $articleId => $article) echo "id = $articleId,  title = {$article->getTitle()} \n";
+            $chosenId = (int)readline("Please select one of the ids above :");
+            echo $chosenId . "\n"; 
+            if (isset($articles[$chosenId])) {
+                $articles[$chosenId]->setStatus('published');
+                echo "article status has succesfully changed to published\n";
+                $badIdChosen = false;
+            }
+            else echo "id chosen not found, please try again\n";
+        } while ($badIdChosen);
     }
 }
 
@@ -117,6 +156,7 @@ class Admin extends Moderator
 
 class Article 
 {
+    private static int $nextId = 0;
     private int $id;
     private string $title;
     private string $content;
@@ -127,8 +167,7 @@ class Article
     private ?DateTime $publishedAt;
     private ?DateTime $updatedAt;
 
-    private function chooseCategories()
-    {
+    private function chooseCategories() {
         global $categories;
         echo "Available categories:\n";
         foreach ($categories as $category) {
@@ -145,9 +184,9 @@ class Article
         }
     }
 
-    public  function __construct(int $id = -1, string $title = "", string $content = "", string $status = "draft", array $categories = [])
-    {
-        $this->id = $id;
+    public  function __construct(string $title = "", string $content = "", string $status = "draft", array $categories = []) {
+        self::$nextId++;
+        $this->id = self::$nextId;
         $this->title = $title;
         $this->content = $content;
         $this->excerpt = substr($content, 0, 150); // part of content;
@@ -158,14 +197,30 @@ class Article
         $this->updatedAt = null;
     }
 
+    public function getId() : int {
+        return $this->id;
+    } 
+
+    public function getTitle() : string {
+        return $this->title;
+    }
+
+    public function isDraft() : bool {
+        return $this->status === "draft";
+    }
+
+    public function setStatus(string $newStatus) : void {
+        $this->status = $newStatus;
+    }
+
     public function setArticleData() : void
     {
         $this->title = readline("Enter article title: ");
         $this->content = readline("Enter article content: ");
+        $this->excerpt = substr($this->content, 0, 150); // part of content;
         $this->createdAt = new DateTime();
         $this->publishedAt = null; 
         $this->updatedAt = null;
-        // to add id,
         $chosenCategories = $this->chooseCategories();
         $chosenCategories = ($chosenCategories);
     }
@@ -287,6 +342,9 @@ function    checkEditorOptions()
             break;
         case 2:
             $connectedUser->createAndAssignArticle();
+            break;
+        case 5:
+            $connectedUser->publishArticle();
             break;
     }
 }
