@@ -19,14 +19,14 @@ class BlogCms
         ];
 
         $this->categories = [
-            new Category(1, "Tech", "Technology", "2024-01-01", null),
-            new Category(2, "AI", "Artificial Intelligence", "2024-01-01", null),
-            new Category(3, "Web", "Web Development", "2024-01-01", null),
+            new Category("Tech", "Technology", "2024-01-01", null),
+            new Category("AI", "Artificial Intelligence", "2024-01-01", null),
+            new Category("Web", "Web Development", "2024-01-01", null),
         ];
         $this->connectedUser = null;
     }
 
-    public function getConnectedUser(){
+    public function getConnectedUser() :?User { 
         return $this->connectedUser;
     }
     
@@ -37,7 +37,7 @@ class BlogCms
     public function getCategories() : array {
         return $this->categories;
     }
-
+    
     public function getAuthors() : array {
         $authors = [];
         foreach($this->users as $user) {
@@ -46,7 +46,19 @@ class BlogCms
         }
         return $authors;
     }
-
+    
+    private function getArticlesInDraft() : array  {
+        $articlesInDraft = [];
+        foreach ($this->users as $user) {
+            if (!$user instanceof Author) continue;
+            foreach($user->getArticles() as $article) {
+                if (!$article->isDraft()) continue ;
+                $articlesInDraft[$article->getId()] = $article;
+            }
+        }
+        return $articlesInDraft;
+    }
+    
     private function    checkUserCredentials($name, $passwd) : void 
     {
         foreach($this->users as $user) {
@@ -74,20 +86,23 @@ class BlogCms
         echo " 5- Publish article.\n";
         // ... 
     }
-    function    checkEditorOptions() 
+    public function    checkEditorOptions() : void  
     {
         $this->displayEditorMenu();
         
         $choice = (int)readline("--> option: ");
         switch ($choice) {
             case 1:
-                $this->connectedUser->readArticles($this->users);
+                $this->connectedUser->readArticles($this->getAuthors());
                 break;
             case 2:
                 $this->connectedUser->createAndAssignArticle($this->getAuthors(), $this->getCategories());
                 break;
+            case 4:
+                // $this->connectedUser->deleteArticle($this->getAvailableArticles());
+                break ;
             case 5:
-                $this->connectedUser->publishArticle();
+                $this->connectedUser->publishArticle($this->getArticlesInDraft());
                 break;
         }
     }

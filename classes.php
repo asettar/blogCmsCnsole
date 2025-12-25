@@ -69,21 +69,6 @@ class Author extends User
 Class Moderator extends User
 {
     // common methods between admin and editor
-   
-    private function getArticlesInDraft() : Array  {
-        global $users;
-        $articlesInDraft = [];
-        foreach ($users as $user) {
-            if (!$user instanceof Author) continue ;
-            foreach($user->getArticles() as $article) {
-                if (!$article->isDraft()) continue ;
-                $articlesInDraft[$article->getId()] = $article;
-            }
-        }
-        return $articlesInDraft;
-    }
-
-        
     private function    getAuthorWithMinArticles(array $authors) : ?Author {
         return count($authors) ? $authors[0] : null; // to fix later
     }
@@ -98,18 +83,15 @@ Class Moderator extends User
         $author->addArticle($newArticle);
     }
 
-    public function readArticles(array $users) : void {
+    public function readArticles(array $authors) : void {
         // todo : list by author/category ..
         echo "Available Articles:\n";
-        foreach($users as $usr) {
-            if ($usr instanceof Author) {
-                $usr->displayArticles();
-            }
+        foreach($authors as $author) {
+            $author->displayArticles();
         }
     }
 
-    public function publishArticle() {
-        $articles = $this->getArticlesInDraft();  //[id : object]
+    public function publishArticle(array $articles) {
         if (!count($articles)) {
             echo "No artilce in draft has been found";
             return ;
@@ -234,15 +216,17 @@ class Article
 
 class Category
 {
+    private static int $nextId = 0;
     private int $id;
     private string $name;
     private string $description;
     private DateTime $createdAt;
     private ?Category $parent;
 
-    public function __construct(int $id, string $name, string $description, string $createdAt, ?Category $parent)
+    public function __construct(string $name, string $description, string $createdAt, ?Category $parent)
     {
-        $this->id = $id;
+        self::$nextId++;
+        $this->id = self::$nextId;
         $this->name = $name;
         $this->description = $description;
         $this->createdAt = new DateTime($createdAt);
