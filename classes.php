@@ -121,24 +121,30 @@ Class Moderator extends User
         }
     }
 
-    public function deleteArticle(array $articles, array $authors) : void {
+    private function    getChosenArticleId(array $articles) : int {
         if (!count($articles)) {
             echo "No artilces has been found.\n";
-            return ;
+            return -1;
         } 
         echo "All available article ids :\n";
         foreach($articles as $articleId => $article) echo "id = $articleId,  title = {$article->getTitle()} \n";
         $chosenId = (int)readline("Please select one of the ids above :");
         if (!isset($articles[$chosenId])) {
             echo "id chosen not found, please try again\n";
-            return ;
+            return -1;
         }
+        return $chosenId;
+    }
+
+    public function deleteArticle(array $articles, array $authors) : void {
+        $chosenId = $this->getChosenArticleId($articles);
         $confirm = readline("Are you sure (Y / N) ? :");
         if ($confirm === 'Y') {
             $this->deleteArticleById($chosenId, $authors);
             echo "article has been succesfully deleted\n";
         }
     }
+
 }
 
 class Editor extends Moderator 

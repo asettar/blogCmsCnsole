@@ -16,8 +16,7 @@ class BlogCms
             new Editor("marie_dubois", "marie.dubois@email.com","admin123", "2024-02-15 09:15:00", "2025-02-15 09:15:00", "junior"),
             new Editor("editor", "marie.dubois@email.com","editor", "2024-02-15 09:15:00", "2025-02-15 09:15:00", "junior"),
             new Author("marie_dubois", "marie.dubois@email.com", "admin123", "2024-02-10 11:30:00", "2025-02-10 11:30:00", "biographie")
-        ];
-
+        ]; 
         $this->categories = [
             new Category("Tech", "Technology", "2024-01-01", null),
             new Category("AI", "Artificial Intelligence", "2024-01-01", null),
@@ -114,6 +113,9 @@ class BlogCms
             case 2:
                 $this->connectedUser->createAndAssignArticle($this->getAuthors(), $this->getCategories());
                 break;
+            case 3:
+                // $this->connectedUser->modifyArticle();
+                break ;
             case 4:
                 $this->connectedUser->deleteArticle($this->getAvailableArticles(), $this->getAuthors());
                 break ;
