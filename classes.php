@@ -37,8 +37,47 @@ class User
         return $this->password;
     }
 
-    protected function readArticle(Article $article) {
-        $article->displayInfo();
+
+    private function displayListArticlesMenu() {
+        // echo "Select one of the option below: "
+        echo "List articles by :
+                1- Author
+                2- categories
+                3- Status
+                4- Date
+            ";
+    }
+
+    private function    listArticlesByAuthors(array $authors) {
+        echo "List of articles by authors:\n";
+        foreach ($authors as $author) {
+            $articles = $author->getArticles();
+            $articlesCnt = count($articles);
+            if (!$articlesCnt) continue;
+            echo "Author : {$author->getUserName()} , num of Articles = {$articlesCnt}\n";
+            foreach($articles as $article)
+                $article->displayShortInfo();
+        }
+    }
+
+    public function listArticles(array $authors) {
+        $this->displayListArticlesMenu();
+        $choice = (int)readline();
+        switch ($choice) {
+            case 1 :
+                $this->listArticlesByAuthors($authors);  
+                break ;
+            case 2 :
+
+                break ;
+            case 3 : 
+
+                break;
+
+            // case 4 
+            default :
+                echo "invalid choice, try again please.\n";
+        }
     }
 }
 
@@ -247,6 +286,10 @@ class Article
         return $this->title;
     }
 
+    public function getStatus() : string {
+        return $this->status;
+    }
+
     public function isDraft() : bool {
         return $this->status === "draft";
     }
@@ -303,6 +346,10 @@ class Article
         foreach($this->categories as $category) echo $category->getName() . ", ";
         echo "\n";
     }
+    
+    public function displayShortInfo() {
+        echo " title = {$this->getTitle()}, status = {$this->getStatus()} \n";
+    } 
 }
 
 class Category

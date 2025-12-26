@@ -89,7 +89,7 @@ class BlogCms
     
     private function displayEditorMenu() : void  {
         echo " Please select an option :\n";
-        echo " 1- Read articles.\n";
+        echo " 1- list articles.\n";
         echo " 2- Create article.\n";
         echo " 3- Modify article.\n";
         echo " 4- Delete article.\n";
@@ -108,7 +108,7 @@ class BlogCms
         if (!$isAdmin && ($choice == 6 || $choice == 7)) $choice = -1;
         switch ($choice) {
             case 1:
-                $this->connectedUser->readArticles($this->getAuthors());
+                $this->connectedUser->listArticles($this->getAuthors());
                 break;
             case 2:
                 $this->connectedUser->createAndAssignArticle($this->getAuthors(), $this->getCategories());
