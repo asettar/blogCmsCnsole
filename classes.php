@@ -42,8 +42,8 @@ class User
         // echo "Select one of the option below: "
         echo "List articles by :
                 1- Author
-                2- categories
-                3- Status
+                2- Status
+                3- categories
                 4- Date
             ";
     }
@@ -60,6 +60,23 @@ class User
         }
     }
 
+    private function    listArticlesByStatus(array $authors) {
+        echo "List of articles by status:\n";
+        $articles = [];   // {status : [articleObject]} 
+        foreach($authors as $author) {
+            foreach ($author->getArticles() as $article) {
+                $articleStatus = $article->getStatus(); 
+                if (!isset($articles[$articleStatus])) $articles[$articleStatus] = [];
+                array_push($articles[$articleStatus], $article);  
+            }
+        }
+
+        foreach ($articles as $status => $articleObjects) {
+            echo "$status Articles : \n";
+            foreach($articleObjects as $article) $article->displayShortInfo(); 
+        }
+    }
+
     public function listArticles(array $authors) {
         $this->displayListArticlesMenu();
         $choice = (int)readline();
@@ -68,7 +85,7 @@ class User
                 $this->listArticlesByAuthors($authors);  
                 break ;
             case 2 :
-
+                $this->listArticlesByStatus($authors);
                 break ;
             case 3 : 
 
