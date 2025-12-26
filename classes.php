@@ -11,14 +11,14 @@ class User
     private DateTime $lastLogin;
 
 
-    public function __construct(string $username, string $email, string $password, string $createdAt, string $lastLogin) {
+    public function __construct(string $username, string $email, string $password) {
         self::$nextId++;
         $this->id = self::$nextId;
         $this->username = $username;
         $this->email = $email;
         $this->password = $password;
-        $this->createdAt = new DateTime($createdAt);
-        $this->lastLogin = new DateTime($lastLogin);
+        $this->createdAt = new DateTime();
+        // $this->lastLogin = new DateTime($lastLogin);
     }
 
     public function getId() {
@@ -43,8 +43,8 @@ class User
         echo "List articles by :
                 1- Author
                 2- Status
-                3- categories
-                4- Date
+                3- Date
+                4- categories
             ";
     }
 
@@ -60,35 +60,46 @@ class User
         }
     }
 
-    private function    listArticlesByStatus(array $authors) {
+    private function    listArticlesByStatus(array $articles) : void {
         echo "List of articles by status:\n";
-        $articles = [];   // {status : [articleObject]} 
-        foreach($authors as $author) {
-            foreach ($author->getArticles() as $article) {
-                $articleStatus = $article->getStatus(); 
-                if (!isset($articles[$articleStatus])) $articles[$articleStatus] = [];
-                array_push($articles[$articleStatus], $article);  
-            }
+        $statusToArticles = [];   // {status => [articleObject]} 
+        foreach ($articles as $id => $article) {
+            $status = $article->getStatus(); 
+            if (!isset($statusToArticles[$status])) $statusToArticles[$status] = [];
+            array_push($statusToArticles[$status], $article);  
         }
-
-        foreach ($articles as $status => $articleObjects) {
+        foreach ($statusToArticles as $status => $articleObjects) {
             echo "$status Articles : \n";
             foreach($articleObjects as $article) $article->displayShortInfo(); 
         }
     }
 
-    public function listArticles(array $authors) {
+    private function listArticlesByDates(array $articles) : void {
+        echo "List of articles by Date:\n";
+        $yearToArticles = [];  //{year => articleObject}
+        foreach ($articles as $id => $article) {
+            $year = $article->getCreationYear(); 
+            if (!isset($yearToArticles[$year])) $yearToArticles[$year] = [];
+            array_push($yearToArticles[$year], $article); 
+        } 
+        foreach ($yearToArticles as $year => $articleObjects) {
+            echo "Articles created at $year : \n";
+            foreach($articleObjects as $article) $article->displayShortInfo(); 
+        }
+    }
+
+    public function listArticles(array $authors, array $articles) : void {
         $this->displayListArticlesMenu();
-        $choice = (int)readline();
+        $choice = (int)readline("  --> option : ");
         switch ($choice) {
             case 1 :
                 $this->listArticlesByAuthors($authors);  
                 break ;
             case 2 :
-                $this->listArticlesByStatus($authors);
+                $this->listArticlesByStatus($articles);
                 break ;
-            case 3 : 
-
+                case 3 : 
+                    $this->listArticlesByDates($articles);
                 break;
 
             // case 4 
@@ -102,8 +113,8 @@ class Author extends User
 {
     private string $bio;
     private array $articles;
-    public  function __construct(string $username, string $email, string $password, string $createdAt, string $lastLogin, string $bio) {
-        User::__construct($username, $email, $password, $createdAt, $lastLogin);
+    public  function __construct(string $username, string $email, string $password, string $bio) {
+        User::__construct($username, $email, $password);
         $this->bio = $bio;
         $this->articles = [];
     }
@@ -236,9 +247,9 @@ Class Moderator extends User
 class Editor extends Moderator 
 {
     private string $moderationLevel;
-    public  function __construct(string $username, string $email, string $password, string $createdAt, string $lastLogin, string $moderationLevel) 
+    public  function __construct(string $username, string $email, string $password, string $moderationLevel) 
     {
-        User::__construct($username, $email, $password, $createdAt, $lastLogin);
+        User::__construct($username, $email, $password);
         $this->moderationLevel = $moderationLevel;
     }
 }
@@ -246,9 +257,9 @@ class Editor extends Moderator
 class Admin extends Moderator
 {
     private bool $isSuperAdmin;
-    public  function __construct(string $username, string $email, string $password, string $createdAt, string $lastLogin, bool $isSuperAdmin) 
+    public  function __construct(string $username, string $email, string $password, bool $isSuperAdmin) 
     {
-        User::__construct($username, $email, $password, $createdAt, $lastLogin);
+        User::__construct($username, $email, $password);
         $this->isSuperAdmin = $isSuperAdmin;
     }
 }
@@ -305,6 +316,10 @@ class Article
 
     public function getStatus() : string {
         return $this->status;
+    }
+
+    public function getCreationYear() : string {
+        return $this->createdAt->format('Y');
     }
 
     public function isDraft() : bool {

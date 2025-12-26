@@ -11,11 +11,11 @@ class BlogCms
     
     public function __construct() {
         // echo "blogCms constrcutor called\n";
-        $this->users = [new Admin("admin_blog", "admin@blogcms.com","admin123", "2024-01-15 10:00:00", "2025-01-15 10:00:00", true),
-            new Admin("admin", "admin@blogcms.com","admin", "2024-01-15 10:00:00", "2025-01-15 10:00:00", true),
-            new Editor("marie_dubois", "marie.dubois@email.com","admin123", "2024-02-15 09:15:00", "2025-02-15 09:15:00", "junior"),
-            new Editor("editor", "marie.dubois@email.com","editor", "2024-02-15 09:15:00", "2025-02-15 09:15:00", "junior"),
-            new Author("marie_dubois", "marie.dubois@email.com", "admin123", "2024-02-10 11:30:00", "2025-02-10 11:30:00", "biographie")
+        $this->users = [new Admin("admin_blog", "admin@blogcms.com","admin123", true),
+            new Admin("admin", "admin@blogcms.com","admin", true),
+            new Editor("marie_dubois", "marie.dubois@email.com","admin123", "junior"),
+            new Editor("editor", "marie.dubois@email.com","editor", "junior"),
+            new Author("marie_dubois", "marie.dubois@email.com", "admin123", "biographie")
         ]; 
         $this->categories = [
             new Category("Tech", "Technology", "2024-01-01", null),
@@ -108,7 +108,7 @@ class BlogCms
         if (!$isAdmin && ($choice == 6 || $choice == 7)) $choice = -1;
         switch ($choice) {
             case 1:
-                $this->connectedUser->listArticles($this->getAuthors());
+                $this->connectedUser->listArticles($this->getAuthors(), $this->getAvailableArticles());
                 break;
             case 2:
                 $this->connectedUser->createAndAssignArticle($this->getAuthors(), $this->getCategories());
