@@ -4,7 +4,6 @@ require_once 'User.php';
 
 Class Moderator extends User
 {
-    // common methods between admin and editor
     private function    getAuthorWithMinArticles(array $authors) : ?Author {
         return count($authors) ? $authors[0] : null; // to fix later
     }
@@ -19,13 +18,6 @@ Class Moderator extends User
         $author->addArticle($newArticle);
     }
 
-    public function readArticles(array $authors) : void {
-        // todo : list by author/category ..
-        echo "Available Articles:\n";
-        foreach($authors as $author) {
-            $author->displayArticles();
-        }
-    }
 
     public function publishArticle(array $articles) {
         if (!count($articles)) {

@@ -11,5 +11,4 @@ class Editor extends Moderator
         $this->moderationLevel = $moderationLevel;
     }
 }
-
 ?>
