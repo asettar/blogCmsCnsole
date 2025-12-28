@@ -90,10 +90,10 @@ class BlogCms
         $name = readline("Enter your name: ");
         $passwd = readline("Enter your password: ");
         $this->checkUserCredentials($name, $passwd);
-        echo $name . "  " . $passwd . "\n";
     } 
     
     private function displayEditorMenu() : void  {
+        echo "====================================================\n";
         echo " Please select an option :\n";
         echo " 1- list articles.\n";
         echo " 2- Create and assign article.\n";

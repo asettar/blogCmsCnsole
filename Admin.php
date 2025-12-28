@@ -10,6 +10,7 @@ class Admin extends Moderator
         User::__construct($username, $email, $password);
         $this->isSuperAdmin = $isSuperAdmin;
     }
+
 }
 
 ?>

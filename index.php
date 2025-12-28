@@ -16,7 +16,6 @@ while (true) {
         else if ($connectedUser instanceof Admin) {
             $blogCmsApp->checkModeratorOptions(true);
         }
-        // 
     }
 }
 

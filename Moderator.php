@@ -4,16 +4,28 @@ require_once 'User.php';
 
 Class Moderator extends User
 {
-    private function    getAuthorWithMinArticles(array $authors) : ?Author {
-        return count($authors) ? $authors[0] : null; // to fix later
+     private function    getChosenAuthor(array $authors) : ?Author {
+        if (!count($authors)) {
+            echo "no authors found.\n";
+            return null;
+        }
+        echo "Please select an id from the availables authors ids: \n";
+        foreach ($authors as $author) {
+            echo " {$author->getId()}- {$author->getUserName()}\n";
+        }
+        $chosenId = (int)readline("--> id :");
+        foreach($authors as $author) {
+            if ($author->getId() == $chosenId) return $author;
+        }
+        echo "selected id is invalid, try again please.\n";
+        return null ;
     }
 
-    // create, modify, delete, publish article
     public function createAndAssignArticle(array $authors, array $categories) : void {
+        $author = $this->getChosenAuthor($authors);
+        if (!$author) return ;
         $newArticle = new Article();
         $newArticle->setArticleData($categories);
-        // assign to the author with minimum articles
-        $author = $this->getAuthorWithMinArticles($authors);
         echo "the article will be set to the author having username {$author->getUserName()}\n";
         $author->addArticle($newArticle);
     }
