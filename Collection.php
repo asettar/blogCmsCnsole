@@ -107,7 +107,7 @@ class BlogCms
     {
         $this->displayEditorMenu();
         if ($isAdmin) {
-            echo " 6- add User.\n";
+            echo " 6- add new User.\n";
             echo " 7- Delete User.\n";
         } 
 
@@ -115,6 +115,7 @@ class BlogCms
         if (!$isAdmin && ($choice == 6 || $choice == 7)) $choice = -1;
         switch ($choice) {
             case 1:
+                echo "list::\n";
                 $this->connectedUser->listArticles($this->getAuthors(), $this->getAvailableArticles());
                 break;
             case 2:
@@ -130,7 +131,7 @@ class BlogCms
                 $this->connectedUser->publishArticle($this->getArticlesInDraft());
                 break;
             case 6:
-                // add User
+                $this->connectedUser->addNewUser($this->users);
                 break;
             case 7: 
                 // delete User
