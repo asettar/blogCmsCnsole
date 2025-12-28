@@ -33,7 +33,7 @@ Class Moderator extends User
 
     public function publishArticle(array $articles) {
         if (!count($articles)) {
-            echo "No artilce in draft has been found";
+            echo "No artilce in draft has been found.\n";
             return ;
         }
         echo "Available article ids in draft :\n";

@@ -95,6 +95,7 @@ class BlogCms
     private function displayEditorMenu() : void  {
         echo "====================================================\n";
         echo " Please select an option :\n";
+        echo " 0- Disconnect.\n";
         echo " 1- list articles.\n";
         echo " 2- Create and assign article.\n";
         echo " 3- Modify article.\n";
@@ -114,8 +115,11 @@ class BlogCms
         $choice = (int)readline("--> option: ");
         if (!$isAdmin && ($choice == 6 || $choice == 7)) $choice = -1;
         switch ($choice) {
+            case 0:
+                echo 'You are disconnted.\n';
+                $this->connectedUser = null;
+                return ;
             case 1:
-                echo "list::\n";
                 $this->connectedUser->listArticles($this->getAuthors(), $this->getAvailableArticles());
                 break;
             case 2:
